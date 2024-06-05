@@ -1,6 +1,9 @@
 import subprocess
 from pathlib import Path
 
+RED = "\033[91m"
+GREEN = "\033[92m"
+RESET = "\033[0m"
 
 def get_current_branch(cwd):
     result = subprocess.run(
@@ -35,7 +38,7 @@ def git_fast_forward(cwd, branch):
         universal_newlines=True,
     )
     if result.returncode != 0:
-        print(f"Erreur lors de l'exécution de 'git checkout {branch}' : {result.stderr.strip()}")
+        print(f"{RED}Erreur lors de l'exécution de 'git checkout {branch}' : {result.stderr.strip()}{RESET}")
         return
 
     result = subprocess.run(
@@ -45,10 +48,13 @@ def git_fast_forward(cwd, branch):
         stderr=subprocess.PIPE,
         universal_newlines=True,
     )
+    
+    print(result.stdout)
+    
     if result.returncode != 0:
-        print(f"Erreur lors de l'exécution de 'git pull --ff-only' : {result.stderr.strip()}")
+        print(f"{RED}Erreur lors de l'exécution de 'git pull --ff-only' : {result.stderr.strip()}{RESET}")
     else:
-        print(f"Branche {branch} mise à jour avec succès.")
+        print(f"{GREEN}Branche {branch} mise à jour avec succès.{RESET}")
 
 
 def git_pull_all_branches(root_dir):
@@ -67,7 +73,7 @@ def git_pull_all_branches(root_dir):
             )
             if status_process.stdout:
                 print(
-                    f"\033[91mDes modifications locales ont été détectées dans {parent_dir}. 'git pull' ne sera pas exécuté pour éviter des conflits.\033[0m"
+                    f"{RED}Des modifications locales ont été détectées dans {parent_dir}. 'git pull' ne sera pas exécuté pour éviter des conflits.{RESET}"
                 )
                 continue
 
@@ -88,19 +94,18 @@ def git_pull_all_branches(root_dir):
             print(f"Revenu à la branche {current_branch} dans {parent_dir}")
 
         except subprocess.CalledProcessError as e:
-            print(f"Erreur lors de l'exécution de 'git pull' dans {parent_dir}: {e.stderr.decode()}")
+            print(f"{RED}Erreur lors de l'exécution de 'git pull' dans {parent_dir}: {e.stderr.decode()}{RESET}")
         except Exception as e:
-            print(f"Une erreur inattendue est survenue dans {parent_dir}: {e}")
+            print(f"{RED}Une erreur inattendue est survenue dans {parent_dir}: {e}{RESET}")
         finally:
             print(f"#############################################")
 
 
 if __name__ == "__main__":
     try:
-        git_pull_all_branches("C:/Data/Business Evolution")
-        git_pull_all_branches("C:/Data/Qualité/Projets")
-        print("git pull a été exécuté dans tous les dossiers parent .git trouvés.")
+        git_pull_all_branches("C:/Data/Repos")
+        print(f"{GREEN}git pull a été exécuté dans tous les dossiers parent .git trouvés.{RESET}")
     except Exception as e:
-        print(f"Une erreur est survenue lors de l'exécution du script: {e}")
+        print(f"{RED}Une erreur est survenue lors de l'exécution du script: {e}{RESET}")
     finally:
         input("Appuyez sur une touche pour continuer...")
