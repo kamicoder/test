@@ -28,6 +28,25 @@ def get_all_branches(cwd):
     return [branch.strip().lstrip('* ') for branch in branches]
 
 
+def git_fetch(cwd):
+    print(f"Tentative de Fetch")
+    result = subprocess.run(
+        ["git", "fetch", "--prune", "--all", "--tags", "--verbose"],
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
+
+    print(result.stdout.strip())
+    print(result.stderr.strip())
+
+    if result.returncode != 0:
+        print(f"{RED}Erreur lors de l'exécution de 'git fetch'.{RESET}")
+    else:
+        print(f"{GREEN}Fetch mise à jour avec succès.{RESET}")
+
+
 def git_fast_forward(cwd, branch):
     print(f"Tentative de mise à jour de la branche {branch}")
     result = subprocess.run(
@@ -49,10 +68,11 @@ def git_fast_forward(cwd, branch):
         universal_newlines=True,
     )
     
-    print(result.stdout)
-    
+    print(result.stdout.strip())
+    print(result.stderr.strip())
+
     if result.returncode != 0:
-        print(f"{RED}Erreur lors de l'exécution de 'git pull --ff-only' : {result.stderr.strip()}{RESET}")
+        print(f"{RED}Erreur lors de l'exécution de 'git pull --ff-only'.{RESET}")
     else:
         print(f"{GREEN}Branche {branch} mise à jour avec succès.{RESET}")
 
@@ -77,6 +97,7 @@ def git_pull_all_branches(root_dir):
                 )
                 continue
 
+            git_fetch(parent_dir)
             current_branch = get_current_branch(parent_dir)
             branches = get_all_branches(parent_dir)
 
